@@ -1,0 +1,135 @@
+///////////////////////////////////////////////////////////////////////////////////
+// 
+//              Synchronous Dual Port SRAM Compiler 
+// 
+//                    UMC 0.18um Generic Logic Process 
+//    __________________________________________________________________________
+// 
+// 
+//        (C) Copyright 2002-2009 Faraday Technology Corp. All Rights Reserved.
+// 
+//      This source code is an unpublished work belongs to Faraday Technology
+//      Corp.  It is considered a trade secret and is not to be divulged or
+//      used by parties who have not received written authorization from
+//      Faraday Technology Corp.
+// 
+//      Faraday's home page can be found at:
+//      http://www.faraday-tech.com/
+//     
+// ________________________________________________________________________________
+// 
+//       Module Name       :  W1024_B8_BM2  
+//       Word              :  1024          
+//       Bit               :  8             
+//       Byte              :  1             
+//       Mux               :  2             
+//       Power Ring Type   :  port          
+//       Power Ring Width  :  2 (um)        
+//       Output Loading    :  0.05 (pf)     
+//       Input Data Slew   :  0.02 (ns)     
+//       Input Clock Slew  :  0.02 (ns)     
+// 
+// ________________________________________________________________________________
+// 
+//       Library          : FSA0M_A
+//       Memaker          : 200901.2.1
+//       Date             : 2024/10/07 09:38:07
+// 
+// ________________________________________________________________________________
+// 
+//       Library          : FSA0M_A
+//       Memaker          : 200901.2.1
+//       Date             : 2024/10/07 09:38:08
+//
+///////////////////////////////////////////////////////////////////////////////////
+
+model W1024_B8_BM2 (
+    A9, A8, A7, A6, A5, A4, A3, A2, A1, A0,
+    B9, B8, B7, B6, B5, B4, B3, B2, B1, B0,
+    DIA7, DIA6, DIA5, DIA4, DIA3, DIA2, DIA1, DIA0,
+    DIB7, DIB6, DIB5, DIB4, DIB3, DIB2, DIB1, DIB0,
+    DOA7, DOA6, DOA5, DOA4, DOA3, DOA2, DOA1, DOA0,
+    DOB7, DOB6, DOB5, DOB4, DOB3, DOB2, DOB1, DOB0,
+    WEAN,
+    WEBN,
+    CKA, CKB, CSA, CSB, OEA, OEB) (
+
+    bist_definition (
+        data_out      DOA(DOA7, DOA6, DOA5, DOA4, DOA3, DOA2, DOA1, DOA0);
+        data_out      DOB(DOB7, DOB6, DOB5, DOB4, DOB3, DOB2, DOB1, DOB0);
+        data_in       DIA(DIA7, DIA6, DIA5, DIA4, DIA3, DIA2, DIA1, DIA0);
+        data_in       DIB(DIB7, DIB6, DIB5, DIB4, DIB3, DIB2, DIB1, DIB0);
+        address       A (A9, A8, A7, A6, A5, A4, A3, A2, A1, A0);
+        address       B (B9, B8, B7, B6, B5, B4, B3, B2, B1, B0);
+        output_enable OEA low;
+        output_enable OEB low;
+        write_enable  WEAN low;
+        write_enable  WEBN low;
+        chip_enable   CSA high;
+        chip_enable   CSB high;
+        clock         CKA high;
+        clock         CKB high;
+        tech          = FSA0M_A;
+        vendor        = "Faraday Technology Inc.";
+        version       = "200901.2.1";
+        min_address   = 0;
+        max_address   = 1023;
+        data_size     = 8;
+        top_column    = 1;
+        top_word      = 1;
+
+        descrambling_definition (
+            address (
+                DSC_A0 = A0;
+                DSC_A1 = A1;
+                DSC_A2 = A2;
+                DSC_A3 = A3;
+                DSC_A4 = A4;
+                DSC_A5 = A5;
+                DSC_A6 = A6;
+                DSC_A7 = A7;
+                DSC_A8 = A8;
+                DSC_A9 = A9;
+            )
+            data_in (	    
+                DSC_DIA0 = DIA0;
+                DSC_DIA1 = DIA1;
+                DSC_DIA2 = DIA2;
+                DSC_DIA3 = DIA3;
+                DSC_DIA4 = DIA4;
+                DSC_DIA5 = DIA5;
+                DSC_DIA6 = DIA6;
+                DSC_DIA7 = DIA7;
+            )
+        )
+
+        read_write_port(
+            read_cycle(
+                assert CSA;
+                change A;
+                expect DOA move;
+            )
+            write_cycle(
+               assert CSA;
+               change A;
+               change DIA;
+               assert WEAN;
+               wait;
+            )
+        )
+        read_write_port(
+            read_cycle(
+                assert CSB;
+                change B;
+                expect DOB move;
+            )
+            write_cycle(
+               assert CSB;
+               change B;
+               change DIB;
+               assert WEBN;
+               wait;
+            )
+        )
+    )
+)

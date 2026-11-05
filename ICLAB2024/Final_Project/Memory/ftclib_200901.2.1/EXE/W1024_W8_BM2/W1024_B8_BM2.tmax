@@ -1,0 +1,128 @@
+///////////////////////////////////////////////////////////////////////////////////
+// 
+//              Synchronous Dual Port SRAM Compiler 
+// 
+//                    UMC 0.18um Generic Logic Process 
+//    __________________________________________________________________________
+// 
+// 
+//        (C) Copyright 2002-2009 Faraday Technology Corp. All Rights Reserved.
+// 
+//      This source code is an unpublished work belongs to Faraday Technology
+//      Corp.  It is considered a trade secret and is not to be divulged or
+//      used by parties who have not received written authorization from
+//      Faraday Technology Corp.
+// 
+//      Faraday's home page can be found at:
+//      http://www.faraday-tech.com/
+//     
+// ________________________________________________________________________________
+// 
+//       Module Name       :  W1024_B8_BM2  
+//       Word              :  1024          
+//       Bit               :  8             
+//       Byte              :  1             
+//       Mux               :  2             
+//       Power Ring Type   :  port          
+//       Power Ring Width  :  2 (um)        
+//       Output Loading    :  0.05 (pf)     
+//       Input Data Slew   :  0.02 (ns)     
+//       Input Clock Slew  :  0.02 (ns)     
+// 
+// ________________________________________________________________________________
+// 
+//       Library          : FSA0M_A
+//       Memaker          : 200901.2.1
+//       Date             : 2024/10/07 09:38:07
+// 
+// ________________________________________________________________________________
+// 
+//
+//       Library          : FSA0M_A
+//       Memaker          : 200901.2.1
+//       Date             : 2024/10/07 09:38:08
+//
+///////////////////////////////////////////////////////////////////////////////////
+
+`define read_read normal
+`define read_write xword
+`define write_write forbidden
+module  W1024_B8_BM2 ( 
+                             A9,A8,A7,A6,A5,A4,A3,A2,A1,A0,
+                             B9,B8,B7,B6,B5,B4,B3,B2,B1,B0, 
+                             DOA7,DOA6,DOA5,DOA4,DOA3,DOA2,DOA1,DOA0,     
+                             DOB7,DOB6,DOB5,DOB4,DOB3,DOB2,DOB1,DOB0,     
+                             DIA7,DIA6,DIA5,DIA4,DIA3,DIA2,DIA1,DIA0,   
+                             DIB7,DIB6,DIB5,DIB4,DIB3,DIB2,DIB1,DIB0,   
+                             WEAN,WEBN,CKA,CKB,CSA,CSB,OEA,OEB);
+                           
+   parameter  AddressSize     = 10;
+   parameter  Bits            = 8;
+   parameter  Words           = 1024;
+   parameter  Bytes           = 1;
+   parameter  DVSize          = 0; 
+ 
+   input CKA, CKB;
+   input CSA, CSB, OEA,OEB;
+   input WEAN;
+   input WEBN;
+   input A9,A8,A7,A6,A5,A4,A3,A2,A1,A0;
+   input B9,B8,B7,B6,B5,B4,B3,B2,B1,B0;
+   input DIA7,DIA6,DIA5,DIA4,DIA3,DIA2,DIA1,DIA0;   
+   input DIB7,DIB6,DIB5,DIB4,DIB3,DIB2,DIB1,DIB0;   
+   output DOA7,DOA6,DOA5,DOA4,DOA3,DOA2,DOA1,DOA0;     
+   output DOB7,DOB6,DOB5,DOB4,DOB3,DOB2,DOB1,DOB0;     
+
+
+   reg [Bits-1:0] mem [0:Words-1] ; 
+   reg [Bits-1:0] DOA ;     
+   reg [Bits-1:0] DOB ;     
+   reg [Bits-1:0] data_regA ;     
+   reg [Bits-1:0] data_regB ;     
+   wire [AddressSize-1:0] A = { A9,A8,A7,A6,A5,A4,A3,A2,A1,A0 }; 
+   wire [AddressSize-1:0] B = { B9,B8,B7,B6,B5,B4,B3,B2,B1,B0 }; 
+   wire [Bits-1:0] DIA = { DIA7,DIA6,DIA5,DIA4,DIA3,DIA2,DIA1,DIA0 }; 
+   wire [Bits-1:0] DIB = { DIB7,DIB6,DIB5,DIB4,DIB3,DIB2,DIB1,DIB0 }; 
+   wire DOA7 = DOA[7] ;     
+   wire DOA6 = DOA[6] ;     
+   wire DOA5 = DOA[5] ;     
+   wire DOA4 = DOA[4] ;     
+   wire DOA3 = DOA[3] ;     
+   wire DOA2 = DOA[2] ;     
+   wire DOA1 = DOA[1] ;     
+   wire DOA0 = DOA[0] ;     
+   wire DOB7 = DOB[7] ;     
+   wire DOB6 = DOB[6] ;     
+   wire DOB5 = DOB[5] ;     
+   wire DOB4 = DOB[4] ;     
+   wire DOB3 = DOB[3] ;     
+   wire DOB2 = DOB[2] ;     
+   wire DOB1 = DOB[1] ;     
+   wire DOB0 = DOB[0] ;     
+
+
+   // write 
+   and u1a (write_enA, !WEAN, CSA); 
+   and u1b (write_enB, !WEBN, CSB); 
+
+   always @ (posedge CKA) 
+         if (write_enA) mem[A] = DIA;    
+   always @ (posedge CKB) 
+         if (write_enB) mem[B] = DIB;    
+
+   always @ (posedge CKA) 
+         if (CSA) data_regA = mem[A];    
+   always @ (posedge CKB) 
+         if (CSB) data_regB = mem[B];    
+
+   always @ (OEA or data_regA)  
+      if (OEA) DOA = data_regA;
+       else    DOA = 8'hZ; 
+   always @ (OEB or data_regB)  
+      if (OEB) DOB = data_regB;
+       else    DOB = 8'hZ; 
+
+endmodule
+`undef read_read
+`undef read_write
+`undef write_write
